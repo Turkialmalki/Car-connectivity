@@ -11,19 +11,28 @@ scans are included.
 
 ### What it depicts
 
-A generic mid-size electric crossover, dimensioned to a real package:
+A full-size three-row electric SUV, styled after the **Rivian R1S** and
+dimensioned to that package:
 
 | Dimension  | Value    |
 | ---------- | -------- |
-| Length     | 4.751 m  |
-| Width      | 1.921 m  |
-| Height     | 1.624 m  |
-| Wheelbase  | 2.890 m  |
-| Wheel      | 19", 255/45 |
+| Length     | 5.100 m  |
+| Width      | 2.015 m  |
+| Height     | 1.820 m  |
+| Wheelbase  | 3.076 m  |
+| Wheel      | 22", 275/50 |
 
-It is deliberately **not badged as any manufacturer's vehicle**, and the app's
-fixtures describe it as an "Electric crossover" for the same reason — see the
-limitation at the bottom of this file.
+The styling cues carried across are the ones that identify the vehicle at a
+glance: upright and slab-sided, a long flat roof over three rows, short
+overhangs, high ground clearance, squared-off wheel arches, a near-vertical
+tailgate, and the signature lighting — a full-width bar across the nose with
+tall vertical lamps outboard of it, repeated at the rear.
+
+The geometry is **authored here from a styling reference**, not copied from any
+manufacturer's data, and the app does **not badge the vehicle**: fixtures
+describe it as an "Electric crossover". Calling generic geometry a Rivian R1S
+would be the same misrepresentation the brief prohibits — see the limitation at
+the bottom of this file.
 
 ### How it is built
 
@@ -49,17 +58,18 @@ placed at the real hinge line:
 
 | Semantic part (app) | Node                     | Axis | Travel | Pivot (x, y, z)        |
 | ------------------- | ------------------------ | ---- | ------ | ---------------------- |
-| `driverDoor`        | `hinge_doorFrontLeft`    | Y    | +64°   | −0.905, 0.760, 0.955   |
-| `passengerDoor`     | `hinge_doorFrontRight`   | Y    | −64°   | 0.905, 0.760, 0.955    |
-| `rearLeftDoor`      | `hinge_doorRearLeft`     | Y    | +72°   | −0.900, 0.760, −0.100  |
-| `rearRightDoor`     | `hinge_doorRearRight`    | Y    | −72°   | 0.900, 0.760, −0.100   |
-| `rearTrunk`         | `hinge_liftgate`         | X    | +44°   | 0, 1.512, −1.520       |
-| `frontTrunk`        | `hinge_frunkLid`         | X    | −52°   | 0, 1.062, 1.150        |
-| `chargePort`        | `hinge_chargePortFlap`   | Y    | −105°  | −0.905, 0.905, −1.700  |
+| `driverDoor`        | `hinge_doorFrontLeft`    | Y    | +66°   | −0.955, 0.900, 0.945   |
+| `passengerDoor`     | `hinge_doorFrontRight`   | Y    | −66°   | 0.955, 0.900, 0.945    |
+| `rearLeftDoor`      | `hinge_doorRearLeft`     | Y    | +74°   | −0.950, 0.900, −0.205  |
+| `rearRightDoor`     | `hinge_doorRearRight`    | Y    | −74°   | 0.950, 0.900, −0.205   |
+| `rearTrunk`         | `hinge_liftgate`         | X    | +68°   | 0, 1.802, −2.055       |
+| `frontTrunk`        | `hinge_frunkLid`         | X    | −50°   | 0, 1.432, 1.090        |
+| `chargePort`        | `hinge_chargePortFlap`   | Y    | +100°  | −1.000, 1.190, 1.790   |
 
 Front doors hinge at the A-pillar, rear doors at the B-pillar, the tailgate at
 the roof's trailing edge, the bonnet at the cowl, and the charge flap on the
-left rear quarter. `src/tests/vehicle-articulation.test.ts` asserts that the
+driver's-side **front wing** — where this vehicle carries it, rather than on the
+rear quarter. `src/tests/vehicle-articulation.test.ts` asserts that the
 app's mapping still agrees with the shipped asset on every axis and angle, so a
 regenerated model that moved a hinge fails the suite rather than silently
 rotating a door about the wrong axis.
@@ -88,11 +98,11 @@ read correctly; not a trimmed interior.
 
 | Metric    | Value      |
 | --------- | ---------- |
-| Triangles | 32,680     |
-| Nodes     | 41         |
-| Meshes    | 33         |
+| Triangles | 28,986     |
+| Nodes     | 39         |
+| Meshes    | 31         |
 | Materials | 15         |
-| File size | 2.10 MB    |
+| File size | 1.72 MB    |
 | Textures  | none — all materials are PBR factors |
 
 No textures at all, which is why the file is small and why it costs no texture
@@ -124,11 +134,70 @@ samples onto one height.
 
 ---
 
+## Dropping in a licensed Rivian R1S
+
+The app is built to take a real asset. The authored model above is the default
+so the app works today; replacing it is a two-file change.
+
+### 1. Get a model that is actually articulated
+
+A single-mesh body **cannot** be animated. Before buying, confirm the scene
+graph exposes four doors, the tailgate, the bonnet and the charge flap as
+separate nodes. Sources checked: Sketchfab (~$20 royalty-free), CGTrader and
+3DModels.org all list an R1S in glTF/GLB, but none could be verified as
+articulated without purchasing.
+
+### 2. Inspect it
+
+```sh
+python3 tools/inspect_model.py path/to/rivian-r1s.glb
+python3 tools/inspect_model.py path/to/rivian-r1s.glb --verbose   # full node list
+```
+
+This reports size, triangle count, bounds and scale, then matches node names
+against each semantic part and prints a **paste-ready `HINGES` block**. Anything
+it marks `MISS` either is not separated in the asset or is named unusually —
+find it in the `--verbose` list and set the name by hand.
+
+### 3. Wire it in
+
+1. Save it as `assets/vehicle/vehicle.glb`.
+2. Paste the generated `HINGES` block into
+   `src/components/vehicle-3d/articulation.ts`.
+3. Check each door's node origin in the inspector output. If a door's node sits
+   at `(0, 0, 0)` rather than out at its pillar, rotating it would swing the
+   door around the middle of the car — set `pivotMode: 'wrap'` on that part and
+   give the real hinge position in `pivot`. The loader then re-parents the node
+   under a group at that point.
+4. Update `LIGHT_GROUPS` with the asset's light mesh names.
+5. Restore the vehicle's `model` string in
+   `src/infrastructure/mock-connected-cloud/fixtures.ts` — with a licensed
+   asset, naming it is accurate rather than a misrepresentation.
+
+Scale, position and facing are handled automatically: the loader normalises any
+asset into canonical space (5.1 m long, centred on X/Z, sitting on Y = 0, facing
++Z), so the camera presets and hotspot anchors keep working. Orientation is the
+one exception — if the car arrives upside down or rolled, rotate the root.
+
+### 4. Verify before running the app
+
+```sh
+python3 tools/preview_model.py /tmp/a.png --view threeQuarter --open doorFrontRight=1
+python3 tools/preview_model.py /tmp/b.png --view rearQuarter --open liftgate=1
+npx jest src/tests/vehicle-articulation.test.ts
+```
+
+The test asserts the app's mapping still agrees with the shipped asset on every
+axis and angle, so a wrong sign fails the suite rather than silently rotating a
+door the wrong way. Then `npm run smoke:web` drives the real app.
+
+---
+
 ## Known limitation: no licensed articulated production vehicle
 
-The brief asked for a **Tesla Model Y** GLB/glTF with independently controllable
-parts. That asset was not obtainable, and this is reported rather than papered
-over.
+No permission-cleared, articulated GLB of a specific production vehicle could be
+obtained — first a Tesla Model Y, then a Rivian R1S. This is reported rather
+than papered over.
 
 **What was checked**
 
@@ -139,28 +208,29 @@ over.
   **two-door concept car**: no rear doors, no tailgate, no charge-port flap, and
   it is not a Model Y. Shipping it under a Tesla label is exactly the
   substitution the brief prohibits.
-- Sketchfab / CGTrader / Free3D Model Y listings: either paid, or licence-
-  restricted, or single-mesh with no separable panels, or requiring an
-  authenticated download. None could be verified as both permission-cleared and
-  articulated.
+- Sketchfab / CGTrader / Free3D listings for both the Model Y and the R1S:
+  either paid, or licence-restricted, or single-mesh with no separable panels,
+  or requiring an authenticated download. None could be verified as both
+  permission-cleared and articulated without buying first.
+- Photographs were considered and rejected as the primary vehicle: a photograph
+  cannot open a door, light a lamp, or hold a camera preset, and the brief
+  explicitly ruled out "a stock photograph with moving labels" and "a flat image
+  rotated to imitate 3D".
 
 **Exactly what is missing**
 
-A permission-cleared Tesla Model Y (2025 "Juniper") glTF/GLB whose scene graph
-exposes, as separate nodes: four doors, tailgate, bonnet, charge-port flap, and
-distinct head/tail/indicator light meshes.
+A permission-cleared **Rivian R1S** glTF/GLB whose scene graph exposes, as
+separate nodes: four doors, tailgate, bonnet, charge-port flap, and distinct
+head/tail/indicator light meshes. See "Dropping in a licensed Rivian R1S" above
+for exactly what to do once one is available.
 
 **What was done instead**
 
 The vehicle was authored (above) so that every required articulation genuinely
-exists and every interaction in the app is real. The consequence is that the
-model is a **generic crossover, not a Model Y** — so the app no longer claims
-otherwise. Fixtures, the pairing screen and the About screen all describe an
+exists and every interaction in the app is real, and then restyled to the R1S
+idiom. Fixtures, the pairing screen and the About screen all describe an
 "Electric crossover", and the previously bundled Tesla photography has been
 removed along with its attribution block.
 
-**Swapping in a licensed Model Y later** is a two-file change: drop the GLB in as
-`assets/vehicle/vehicle.glb`, and update the node names, axes, angles and pivots
-in `src/components/vehicle-3d/articulation.ts` to match its scene graph. Nothing
-else in the app refers to node names. Restore the vehicle's `model` string in
-`src/infrastructure/mock-connected-cloud/fixtures.ts` at the same time.
+The consequence is that the model is a **styling reference, not a Rivian**, and
+the app does not claim otherwise.

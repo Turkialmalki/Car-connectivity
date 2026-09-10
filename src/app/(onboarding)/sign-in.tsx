@@ -21,6 +21,15 @@ import { useAppStore, useUiStore } from '@/stores';
 import { createBiometricAdapter } from '@/infrastructure/native-connectivity';
 import { DEMO_USER } from '@/infrastructure/mock-connected-cloud';
 import { connected } from '@/infrastructure/api';
+
+/**
+ * The shared demo account on the deployed backend.
+ *
+ * Same credentials as the web console's "Open the demo vehicle" button, so the
+ * two halves of the product open the same car. It is an ordinary account: it
+ * signs in through Supabase Auth and sees only the vehicle it owns.
+ */
+const DEMO_ACCOUNT = { email: 'demo@carconnectivity.app', password: 'demo-vehicle-2026' };
 import { OnboardingHeader } from '@/features/onboarding/OnboardingHeader';
 
 const biometric = createBiometricAdapter();
@@ -189,11 +198,24 @@ export default function SignIn() {
               onPress={() => void onBiometric()}
             />
             {connected ? (
-              <Button
-                label="Create an account"
-                variant="secondary"
-                onPress={() => void onCreateAccount()}
-              />
+              <>
+                <Button
+                  label="Use the demo vehicle"
+                  icon="car"
+                  variant="secondary"
+                  onPress={() => void proceed(DEMO_ACCOUNT)}
+                />
+                <Pressable
+                  onPress={() => void onCreateAccount()}
+                  haptic="light"
+                  accessibilityLabel="Create an account"
+                  style={{ alignItems: 'center', paddingVertical: theme.spacing.sm }}
+                >
+                  <Text variant="caption" color={theme.colors.desert}>
+                    Create an account
+                  </Text>
+                </Pressable>
+              </>
             ) : (
               <Pressable
                 onPress={() => void proceed()}

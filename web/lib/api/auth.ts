@@ -112,11 +112,17 @@ export const authenticateSimulator = async (
   if (error || !data) return null;
 
   const row = data as {
-    id: string;
-    vehicle_id: string;
-    user_id: string;
-    expires_at: string;
+    id: string | null;
+    vehicle_id: string | null;
+    user_id: string | null;
+    expires_at: string | null;
   };
+
+  // A plpgsql function returning a composite type yields a row of NULLs rather
+  // than no row at all when it matched nothing, and PostgREST passes that
+  // through as an object. Treating it as a session would authenticate a forged
+  // or expired token, so the columns are what decide, not the row's existence.
+  if (!row.id || !row.vehicle_id || !row.user_id || !row.expires_at) return null;
 
   return {
     id: row.id,

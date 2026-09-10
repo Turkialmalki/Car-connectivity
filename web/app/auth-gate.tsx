@@ -40,6 +40,20 @@ export const useSession = () => {
   return { session, loading };
 };
 
+/**
+ * A shared, pre-provisioned account.
+ *
+ * Every vehicle in this system is simulated, so a demo account controls nothing
+ * that exists. Its purpose is that somebody can look at the system without
+ * first inventing a password and waiting for a confirmation email — and it is
+ * an ordinary account with ordinary permissions, not a bypass: it authenticates
+ * through Supabase Auth like any other and sees only its own vehicle.
+ */
+export const DEMO_ACCOUNT = {
+  email: 'demo@carconnectivity.app',
+  password: 'demo-vehicle-2026',
+} as const;
+
 export const SignInPanel = ({ heading }: { heading: string }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,6 +61,15 @@ export const SignInPanel = ({ heading }: { heading: string }) => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const signInAsDemo = useCallback(async () => {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    const { error: demoError } = await browserClient().auth.signInWithPassword(DEMO_ACCOUNT);
+    if (demoError) setError(demoError.message);
+    setBusy(false);
+  }, []);
 
   const submit = useCallback(
     async (event: React.FormEvent) => {
@@ -80,6 +103,34 @@ export const SignInPanel = ({ heading }: { heading: string }) => {
       <h2>{heading}</h2>
       {error ? <div className="error">{error}</div> : null}
       {notice ? <p className="muted">{notice}</p> : null}
+
+      <button
+        className="btn primary"
+        style={{ width: '100%', marginBottom: 8 }}
+        onClick={() => void signInAsDemo()}
+        disabled={busy}
+      >
+        {busy ? 'Signing in…' : 'Open the demo vehicle'}
+      </button>
+      <p className="muted" style={{ marginBottom: 18 }}>
+        No sign-up needed. A simulated vehicle is already attached to this account.
+      </p>
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          margin: '18px 0',
+          color: 'var(--text-tertiary)',
+          fontSize: 12,
+        }}
+      >
+        <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+        or use your own account
+        <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+      </div>
+
       <form onSubmit={submit}>
         <div className="field">
           <label htmlFor="email">Email</label>

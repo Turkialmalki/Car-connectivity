@@ -61,7 +61,10 @@ export async function POST(request: Request) {
     return fail('server_error', 'The report could not be stored.');
   }
 
-  if (!data) {
+  // The ingest function returns a row of NULLs, not an empty result, when its
+  // staleness guard rejected the report — and PostgREST hands that back as an
+  // object. The vehicle id is what says a row was really written.
+  if (!data || !(data as VehicleStateRow).vehicle_id) {
     // Not an error on the simulator's part — just a packet that arrived after a
     // newer one. Saying so lets the simulator resynchronise instead of retrying.
     return fail('stale_report', 'A newer report is already stored for this vehicle.');

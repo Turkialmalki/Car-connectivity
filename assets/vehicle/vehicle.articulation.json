@@ -117,11 +117,11 @@
     "cabinShell": 3840,
     "centreScreen": 80,
     "dashboard": 120,
-    "daytimeRunningBar": 44,
-    "headlightLeft": 80,
-    "headlightRight": 80,
-    "indicatorFrontLeft": 20,
-    "indicatorFrontRight": 20,
+    "daytimeRunningBar": 68,
+    "headlightLeft": 20,
+    "headlightRight": 20,
+    "indicatorFrontLeft": 8,
+    "indicatorFrontRight": 8,
     "indicatorRearLeft": 16,
     "indicatorRearRight": 16,
     "mirrorLeft": 120,
@@ -140,9 +140,9 @@
     "seatThirdLeft": 360,
     "seatThirdRight": 360,
     "steeringWheel": 144,
-    "taillightBar": 40,
-    "taillightLeft": 64,
-    "taillightRight": 64,
+    "taillightBar": 32,
+    "taillightLeft": 80,
+    "taillightRight": 80,
     "wheelFrontLeft": 842,
     "wheelFrontRight": 842,
     "wheelRearLeft": 842,
@@ -167,10 +167,10 @@
     "wheelRearRight"
   ],
   "totals": {
-    "bytes": 1810604,
+    "bytes": 1805312,
     "materials": 15,
     "meshes": 35,
     "nodes": 43,
-    "triangles": 29284
+    "triangles": 29188
   }
 }

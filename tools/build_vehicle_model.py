@@ -523,30 +523,39 @@ MATERIALS = {
     "brakeDisc":       ((0.300, 0.305, 0.312, 1.0), 0.75, 0.420, None, False),
 }
 
-# Light surfaces: name -> (z range, t range, side, material)
-#   side: -1 left, +1 right, 0 both
+# Light surfaces.
 #
-# The signature of this vehicle is a FULL-WIDTH horizontal bar across the nose
-# with TALL VERTICAL "stadium" lamps outboard of it, and the same idea repeated
-# at the rear. A vertical lamp is a wide `t` span at a narrow `z`; a horizontal
-# bar is a narrow `t` span running across every `x`.
-# Entries are (z range, t range, side, material, minimum |x| in metres).
-# The |x| floor is what pins a lamp to the OUTER edge of the face: `side` only
-# picks left from right, it cannot say "outboard".
+# Selected by ABSOLUTE position — z depth, height above ground, and distance
+# from the centreline — rather than by the section parameter `t`. On the flat
+# front and rear faces the end-cap rings shrink toward their centroid, so a
+# constant-`t` band sweeps inward across the face and paints a wedge instead of
+# a lamp. Real bounds are predictable there; `t` is not.
+#
+# Layout is this vehicle's signature: a full-width horizontal bar high on the
+# face, with a TALL VERTICAL lamp at each outer corner beneath it.
+#   z: depth range      y: height above ground      x: distance from centreline
 LIGHT_PATCHES = {
-    # Front: a full-width bar high on the face, with a tall vertical lamp
-    # hanging at each outer corner beneath it.
-    "daytimeRunningBar":   ((2.540, 2.596), (0.556, 0.610), 0, "headlightLens", 0.00),
-    "headlightLeft":       ((2.540, 2.596), (0.318, 0.552), -1, "headlightLens", 0.60),
-    "headlightRight":      ((2.540, 2.596), (0.318, 0.552), +1, "headlightLens", 0.60),
-    "indicatorFrontLeft":  ((2.540, 2.596), (0.246, 0.310), -1, "indicatorLens", 0.60),
-    "indicatorFrontRight": ((2.540, 2.596), (0.246, 0.310), +1, "indicatorLens", 0.60),
-    # Rear: the same idea repeated.
-    "taillightBar":        ((-2.596, -2.540), (0.556, 0.610), 0, "taillightLens", 0.00),
-    "taillightLeft":       ((-2.596, -2.540), (0.318, 0.552), -1, "taillightLens", 0.60),
-    "taillightRight":      ((-2.596, -2.540), (0.318, 0.552), +1, "taillightLens", 0.60),
-    "indicatorRearLeft":   ((-2.596, -2.540), (0.246, 0.310), -1, "indicatorLens", 0.60),
-    "indicatorRearRight":  ((-2.596, -2.540), (0.246, 0.310), +1, "indicatorLens", 0.60),
+    "daytimeRunningBar":   dict(z=(2.500, 2.566), y=(1.140, 1.300), x=(0.000, 0.985),
+                                side=0, material="headlightLens", facing="front"),
+    "headlightLeft":       dict(z=(2.460, 2.592), y=(0.868, 1.150), x=(0.620, 0.950),
+                                side=-1, material="headlightLens", facing="front"),
+    "headlightRight":      dict(z=(2.460, 2.592), y=(0.868, 1.150), x=(0.620, 0.950),
+                                side=+1, material="headlightLens", facing="front"),
+    "indicatorFrontLeft":  dict(z=(2.460, 2.592), y=(0.730, 0.860), x=(0.620, 0.950),
+                                side=-1, material="indicatorLens", facing="front"),
+    "indicatorFrontRight": dict(z=(2.460, 2.592), y=(0.730, 0.860), x=(0.620, 0.950),
+                                side=+1, material="indicatorLens", facing="front"),
+
+    "taillightBar":        dict(z=(-2.566, -2.420), y=(1.310, 1.470), x=(0.000, 0.985),
+                                side=0, material="taillightLens", facing="rear"),
+    "taillightLeft":       dict(z=(-2.592, -2.400), y=(0.980, 1.310), x=(0.620, 0.950),
+                                side=-1, material="taillightLens", facing="rear"),
+    "taillightRight":      dict(z=(-2.592, -2.400), y=(0.980, 1.310), x=(0.620, 0.950),
+                                side=+1, material="taillightLens", facing="rear"),
+    "indicatorRearLeft":   dict(z=(-2.592, -2.400), y=(0.830, 0.965), x=(0.620, 0.950),
+                                side=-1, material="indicatorLens", facing="rear"),
+    "indicatorRearRight":  dict(z=(-2.592, -2.400), y=(0.830, 0.965), x=(0.620, 0.950),
+                                side=+1, material="indicatorLens", facing="rear"),
 }
 
 
@@ -656,22 +665,33 @@ def build_panels():
     # Light lenses, offset proud of the body and parented to whichever panel
     # owns that stretch of bodywork, so a lens on the tailgate travels with it.
     lights = {}
-    for name, (zr, tr, side, material, min_abs_x) in LIGHT_PATCHES.items():
+    for name, spec in LIGHT_PATCHES.items():
+        zr, yr, xr = spec["z"], spec["y"], spec["x"]
+        side, material, facing = spec["side"], spec["material"], spec["facing"]
+        want_nz = 1.0 if facing == "front" else -1.0
         mesh = Mesh(name)
         owner_votes = {}
         outer = offset_grid(grid, normals, -LENS_OFFSET)
         for i in range(rows - 1):
             for j in range(cols):
                 j2 = (j + 1) % cols
-                cx, _, cz = cell_centre(grid, i, j)
+                cx, cy, cz = cell_centre(grid, i, j)
                 t = (t_values[j] + t_values[j2]) / 2.0
-                if not (zr[0] <= cz <= zr[1] and tr[0] <= t <= tr[1]):
+                if not (zr[0] <= cz <= zr[1]):
+                    continue
+                if not (yr[0] <= cy <= yr[1]):
+                    continue
+                if not (xr[0] <= abs(cx) <= xr[1]):
+                    continue
+                # Only surfaces that actually point the right way: a lamp band
+                # must not creep over the bonnet lip or around the roof.
+                nz = (normals[i][j][2] + normals[i + 1][j][2]
+                      + normals[i + 1][j2][2] + normals[i][j2][2]) / 4.0
+                if nz * want_nz < 0.28:
                     continue
                 if side < 0 and cx >= 0:
                     continue
                 if side > 0 and cx <= 0:
-                    continue
-                if abs(cx) < min_abs_x:
                     continue
                 mesh.add_quad(material, outer[i][j], outer[i + 1][j],
                               outer[i + 1][j2], outer[i][j2])
