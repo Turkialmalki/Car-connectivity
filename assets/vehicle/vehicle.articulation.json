@@ -1,0 +1,172 @@
+{
+  "hinges": {
+    "chargePortFlap": {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "node": "hinge_chargePortFlap",
+      "openDegrees": -105.0,
+      "pivot": [
+        -0.905,
+        0.905,
+        -1.7
+      ]
+    },
+    "doorFrontLeft": {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "node": "hinge_doorFrontLeft",
+      "openDegrees": 64.0,
+      "pivot": [
+        -0.905,
+        0.76,
+        0.955
+      ]
+    },
+    "doorFrontRight": {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "node": "hinge_doorFrontRight",
+      "openDegrees": -64.0,
+      "pivot": [
+        0.905,
+        0.76,
+        0.955
+      ]
+    },
+    "doorRearLeft": {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "node": "hinge_doorRearLeft",
+      "openDegrees": 72.0,
+      "pivot": [
+        -0.9,
+        0.76,
+        -0.1
+      ]
+    },
+    "doorRearRight": {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "node": "hinge_doorRearRight",
+      "openDegrees": -72.0,
+      "pivot": [
+        0.9,
+        0.76,
+        -0.1
+      ]
+    },
+    "frunkLid": {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "node": "hinge_frunkLid",
+      "openDegrees": -52.0,
+      "pivot": [
+        0.0,
+        1.062,
+        1.15
+      ]
+    },
+    "liftgate": {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "node": "hinge_liftgate",
+      "openDegrees": 44.0,
+      "pivot": [
+        0.0,
+        1.512,
+        -1.52
+      ]
+    }
+  },
+  "lights": [
+    "daytimeRunningBar",
+    "headlightLeft",
+    "headlightRight",
+    "indicatorFrontLeft",
+    "indicatorFrontRight",
+    "indicatorRearLeft",
+    "indicatorRearRight",
+    "taillightBar",
+    "taillightLeft",
+    "taillightRight"
+  ],
+  "meshes": {
+    "bodyShell": 10606,
+    "cabinFloor": 48,
+    "cabinShell": 5400,
+    "centreScreen": 80,
+    "dashboard": 120,
+    "daytimeRunningBar": 36,
+    "headlightLeft": 32,
+    "headlightRight": 32,
+    "indicatorFrontLeft": 8,
+    "indicatorFrontRight": 8,
+    "indicatorRearLeft": 8,
+    "indicatorRearRight": 8,
+    "mirrorLeft": 120,
+    "mirrorRight": 120,
+    "panel_chargePortFlap": 124,
+    "panel_doorFrontLeft": 1232,
+    "panel_doorFrontRight": 1232,
+    "panel_doorRearLeft": 1136,
+    "panel_doorRearRight": 1136,
+    "panel_frunkLid": 1520,
+    "panel_liftgate": 4622,
+    "seatFrontLeft": 360,
+    "seatFrontRight": 360,
+    "seatRearLeft": 360,
+    "seatRearRight": 360,
+    "steeringWheel": 144,
+    "taillightBar": 36,
+    "taillightLeft": 32,
+    "taillightRight": 32,
+    "wheelFrontLeft": 842,
+    "wheelFrontRight": 842,
+    "wheelRearLeft": 842,
+    "wheelRearRight": 842
+  },
+  "static": [
+    "bodyShell",
+    "cabinShell",
+    "cabinFloor",
+    "dashboard",
+    "centreScreen",
+    "steeringWheel",
+    "seatFrontLeft",
+    "seatFrontRight",
+    "seatRearLeft",
+    "seatRearRight",
+    "wheelFrontLeft",
+    "wheelFrontRight",
+    "wheelRearLeft",
+    "wheelRearRight"
+  ],
+  "totals": {
+    "bytes": 2205980,
+    "materials": 15,
+    "meshes": 33,
+    "nodes": 41,
+    "triangles": 32680
+  }
+}

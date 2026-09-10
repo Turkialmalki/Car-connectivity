@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Vehicle",
+    "slug": "nova-drive",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "novadrive",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "backgroundColor": "#090B0D",
+    "splash": {
+      "backgroundColor": "#090B0D",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.novadrive.prototype",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Face ID is used to confirm high-risk vehicle commands such as remote unlock.",
+        "NSLocationWhenInUseUsageDescription": "Your location is used to show where your vehicle is parked relative to you.",
+        "NSBluetoothAlwaysUsageDescription": "Bluetooth is used to discover your vehicle for Digital Key access."
+      }
+    },
+    "android": {
+      "package": "com.novadrive.prototype",
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "backgroundColor": "#090B0D"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-local-authentication",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

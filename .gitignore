@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+
+# Environment — real values never enter the repository.
+.env
+.env.local
+.env*.local
+
+# Next.js app
+web/.next/
+web/node_modules/
+web/out/
