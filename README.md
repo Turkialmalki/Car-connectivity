@@ -142,6 +142,29 @@ or paste each file into the SQL editor, in order.
 > Adding a policy to it works; `ALTER TABLE` on it does not, and is not needed — RLS is
 > already enabled there on a hosted project.
 
+### Deployment
+
+| | |
+|---|---|
+| **Live** | https://car-connectivity.vercel.app |
+| **Simulator console** | https://car-connectivity.vercel.app/simulator |
+| **Vercel project** | `car-connectivity`, root directory `web`, linked to this repository |
+| **Supabase project** | `Car-connectivity` (`prcnihieupchvarwwmdf`) |
+
+`SUPABASE_SECRET_KEY` must be set on the Vercel project before the API can do
+anything beyond reject unauthenticated calls. It is the one value that cannot be
+committed or read back from a dashboard API, so it is added by hand:
+
+```bash
+cd web
+vercel env add SUPABASE_SECRET_KEY production
+vercel env add SUPABASE_SECRET_KEY preview
+vercel deploy --prod
+```
+
+Take the value from **Supabase → Project Settings → API Keys → secret**
+(`sb_secret_...`).
+
 ### 2. The Next.js app
 
 ```bash

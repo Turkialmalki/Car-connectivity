@@ -28,8 +28,21 @@ export type HingeSpec = {
   axis: HingeAxis;
   /** Rotation in degrees that corresponds to fully open. Sign matters. */
   openDegrees: number;
-  /** Where the hinge sits, in model space. Used to place hotspots. */
+  /** Where the hinge sits, in normalised model space. Also places hotspots. */
   pivot: readonly [number, number, number];
+  /**
+   * How the hinge is realised.
+   *
+   * 'node'  the node's own origin IS the hinge, so rotating it is correct.
+   *         True for the bundled model and for any properly rigged asset.
+   * 'wrap'  the node's origin is somewhere else (commonly the model origin),
+   *         so rotating it would swing the door around the middle of the car.
+   *         The loader then re-parents it under a group placed at `pivot`.
+   *
+   * Most commercial assets need 'wrap'. Check with tools/inspect_model.py: if a
+   * door's node sits at (0, 0, 0) rather than out at the A-pillar, use 'wrap'.
+   */
+  pivotMode?: 'node' | 'wrap';
   /** Human label. "Rear trunk", not "liftgate". */
   label: string;
 };

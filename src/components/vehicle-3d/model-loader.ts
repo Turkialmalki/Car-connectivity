@@ -55,6 +55,7 @@ const loadSource = (): Promise<THREE.Group> => {
     const loader = new GLTFLoader();
     const gltf = await loader.parseAsync(buffer, '');
     const scene = gltf.scene;
+    normaliseIntoCanonicalSpace(scene);
     // Frustum culling per-part is counter-productive here: the vehicle is always
     // wholly in frame, and culling costs a bounds test per node per frame.
     scene.traverse((node) => {
@@ -75,6 +76,85 @@ const loadSource = (): Promise<THREE.Group> => {
       : new ModelLoadError('Vehicle model could not be parsed', error);
   });
   return sourcePromise;
+};
+
+/**
+ * Canonical model space, which the camera presets and hotspot anchors assume:
+ *   +Z is the nose, +X the vehicle's right, +Y up;
+ *   the vehicle is CANONICAL_LENGTH long, centred on X/Z, sitting on Y = 0.
+ *
+ * The bundled model is authored in this space, so normalising it is very nearly
+ * a no-op. A purchased asset almost never is — it may be in centimetres, facing
+ * X, or sitting with its origin at a wheel — so it is brought into the same
+ * space here rather than every camera preset being retuned per asset.
+ */
+const CANONICAL_LENGTH = 5.1;
+
+const normaliseIntoCanonicalSpace = (scene: THREE.Group) => {
+  scene.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(scene);
+  if (box.isEmpty()) return;
+
+  const size = box.getSize(new THREE.Vector3());
+  // A vehicle is longer than it is wide or tall, so the longest horizontal axis
+  // is the one it faces along.
+  if (size.x > size.z) {
+    // Facing X: turn it to face +Z. Assets exported from CAD often are.
+    scene.rotateY(-Math.PI / 2);
+    scene.updateMatrixWorld(true);
+    box.setFromObject(scene);
+    box.getSize(size);
+    logger.info('Vehicle model faced X; rotated to face Z');
+  }
+
+  const length = Math.max(size.x, size.z);
+  if (length > 1e-6) {
+    const factor = CANONICAL_LENGTH / length;
+    // Leave a model that is already the right size alone, so the bundled asset
+    // keeps its exact authored coordinates.
+    if (Math.abs(factor - 1) > 0.02) {
+      scene.scale.multiplyScalar(factor);
+      scene.updateMatrixWorld(true);
+      box.setFromObject(scene);
+      logger.info('Vehicle model rescaled', { factor: Number(factor.toFixed(4)) });
+    }
+  }
+
+  const centre = box.getCenter(new THREE.Vector3());
+  scene.position.x -= centre.x;
+  scene.position.z -= centre.z;
+  scene.position.y -= box.min.y; // sit it on the ground plane
+  scene.updateMatrixWorld(true);
+};
+
+/**
+ * Re-parents a part under a group placed at its hinge.
+ *
+ * Needed when an asset's door node has its origin at the model origin: rotating
+ * that node swings the door around the centre of the car. The pivot is given in
+ * model space and converted into the node's parent space, so it works wherever
+ * the node sits in the hierarchy.
+ */
+const wrapInPivot = (
+  scene: THREE.Group,
+  node: THREE.Object3D,
+  pivot: readonly [number, number, number],
+): THREE.Object3D => {
+  const parent = node.parent;
+  if (!parent) return node;
+  scene.updateMatrixWorld(true);
+
+  const world = scene.localToWorld(new THREE.Vector3(pivot[0], pivot[1], pivot[2]));
+  const local = parent.worldToLocal(world.clone());
+
+  const group = new THREE.Group();
+  group.name = `${node.name}__pivot`;
+  group.position.copy(local);
+  node.position.sub(local);
+
+  parent.add(group);
+  group.add(node);
+  return group;
 };
 
 const LIGHT_NODE_TO_GROUP = new Map<string, LightGroup>();
@@ -108,9 +188,16 @@ export const createVehicleModel = async (): Promise<VehicleModel> => {
   const paintMaterials: THREE.MeshStandardMaterial[] = [];
   const owned: THREE.Material[] = [];
 
+  // Collected first, because wrapping a node in a pivot group mutates the
+  // hierarchy and must not happen during a traversal of it.
+  const toWrap: Array<{ part: VehiclePart; node: THREE.Object3D }> = [];
+
   scene.traverse((node) => {
     const part = byNodeName.get(node.name);
-    if (part) hinges[part] = node;
+    if (part) {
+      hinges[part] = node;
+      if (HINGES[part].pivotMode === 'wrap') toWrap.push({ part, node });
+    }
 
     const mesh = node as THREE.Mesh;
     if (!mesh.isMesh) return;
@@ -138,6 +225,10 @@ export const createVehicleModel = async (): Promise<VehicleModel> => {
       return standard;
     });
     mesh.material = next.length === 1 ? next[0]! : next;
+  });
+
+  toWrap.forEach(({ part, node }) => {
+    hinges[part] = wrapInPivot(scene, node, HINGES[part].pivot);
   });
 
   const missing = (Object.keys(HINGES) as VehiclePart[]).filter((part) => !hinges[part]);
