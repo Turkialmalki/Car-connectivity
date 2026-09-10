@@ -78,7 +78,11 @@ export class HttpSimulatorTransport implements SimulatorTransport {
     this.baseUrl = options.baseUrl.replace(/\/$/, '');
     this.token = options.token;
     this.vehicleId = options.vehicleId;
-    this.doFetch = options.fetchImpl ?? fetch;
+    // `fetch` must stay bound to its global. Assigning the bare function to a
+    // property and calling it as `this.doFetch(...)` throws "Illegal invocation"
+    // in a browser, where fetch is a method of `window`; Node does not care,
+    // which is exactly why this only failed once the console ran for real.
+    this.doFetch = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
   }
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -157,7 +161,7 @@ export const openHttpTransport = async (options: {
   label?: string;
   fetchImpl?: typeof fetch;
 }): Promise<{ transport: HttpSimulatorTransport; expiresAt: string; sessionId: string }> => {
-  const doFetch = options.fetchImpl ?? fetch;
+  const doFetch = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
   const baseUrl = options.baseUrl.replace(/\/$/, '');
 
   const response = await doFetch(`${baseUrl}/api/simulator/sessions`, {
