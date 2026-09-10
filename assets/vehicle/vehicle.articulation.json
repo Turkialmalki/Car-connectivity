@@ -7,11 +7,11 @@
         0
       ],
       "node": "hinge_chargePortFlap",
-      "openDegrees": -105.0,
+      "openDegrees": 100.0,
       "pivot": [
-        -0.905,
-        0.905,
-        -1.7
+        -1.0,
+        1.19,
+        1.79
       ]
     },
     "doorFrontLeft": {
@@ -21,11 +21,11 @@
         0
       ],
       "node": "hinge_doorFrontLeft",
-      "openDegrees": 64.0,
+      "openDegrees": 66.0,
       "pivot": [
-        -0.905,
-        0.76,
-        0.955
+        -0.955,
+        0.9,
+        0.945
       ]
     },
     "doorFrontRight": {
@@ -35,11 +35,11 @@
         0
       ],
       "node": "hinge_doorFrontRight",
-      "openDegrees": -64.0,
+      "openDegrees": -66.0,
       "pivot": [
-        0.905,
-        0.76,
-        0.955
+        0.955,
+        0.9,
+        0.945
       ]
     },
     "doorRearLeft": {
@@ -49,11 +49,11 @@
         0
       ],
       "node": "hinge_doorRearLeft",
-      "openDegrees": 72.0,
+      "openDegrees": 74.0,
       "pivot": [
-        -0.9,
-        0.76,
-        -0.1
+        -0.95,
+        0.9,
+        -0.205
       ]
     },
     "doorRearRight": {
@@ -63,11 +63,11 @@
         0
       ],
       "node": "hinge_doorRearRight",
-      "openDegrees": -72.0,
+      "openDegrees": -74.0,
       "pivot": [
+        0.95,
         0.9,
-        0.76,
-        -0.1
+        -0.205
       ]
     },
     "frunkLid": {
@@ -77,11 +77,11 @@
         0
       ],
       "node": "hinge_frunkLid",
-      "openDegrees": -52.0,
+      "openDegrees": -50.0,
       "pivot": [
         0.0,
-        1.062,
-        1.15
+        1.432,
+        1.09
       ]
     },
     "liftgate": {
@@ -91,11 +91,11 @@
         0
       ],
       "node": "hinge_liftgate",
-      "openDegrees": 44.0,
+      "openDegrees": 68.0,
       "pivot": [
         0.0,
-        1.512,
-        -1.52
+        1.802,
+        -2.055
       ]
     }
   },
@@ -112,35 +112,37 @@
     "taillightRight"
   ],
   "meshes": {
-    "bodyShell": 10606,
-    "cabinFloor": 48,
-    "cabinShell": 5400,
+    "bodyShell": 10018,
+    "cabinFloor": 56,
+    "cabinShell": 3840,
     "centreScreen": 80,
     "dashboard": 120,
-    "daytimeRunningBar": 36,
-    "headlightLeft": 32,
-    "headlightRight": 32,
-    "indicatorFrontLeft": 8,
-    "indicatorFrontRight": 8,
-    "indicatorRearLeft": 8,
-    "indicatorRearRight": 8,
+    "daytimeRunningBar": 44,
+    "headlightLeft": 80,
+    "headlightRight": 80,
+    "indicatorFrontLeft": 20,
+    "indicatorFrontRight": 20,
+    "indicatorRearLeft": 16,
+    "indicatorRearRight": 16,
     "mirrorLeft": 120,
     "mirrorRight": 120,
-    "panel_chargePortFlap": 124,
-    "panel_doorFrontLeft": 1232,
-    "panel_doorFrontRight": 1232,
-    "panel_doorRearLeft": 1136,
-    "panel_doorRearRight": 1136,
-    "panel_frunkLid": 1520,
-    "panel_liftgate": 4622,
+    "panel_chargePortFlap": 96,
+    "panel_doorFrontLeft": 1284,
+    "panel_doorFrontRight": 1284,
+    "panel_doorRearLeft": 784,
+    "panel_doorRearRight": 784,
+    "panel_frunkLid": 1664,
+    "panel_liftgate": 2918,
     "seatFrontLeft": 360,
     "seatFrontRight": 360,
     "seatRearLeft": 360,
     "seatRearRight": 360,
+    "seatThirdLeft": 360,
+    "seatThirdRight": 360,
     "steeringWheel": 144,
-    "taillightBar": 36,
-    "taillightLeft": 32,
-    "taillightRight": 32,
+    "taillightBar": 40,
+    "taillightLeft": 64,
+    "taillightRight": 64,
     "wheelFrontLeft": 842,
     "wheelFrontRight": 842,
     "wheelRearLeft": 842,
@@ -157,16 +159,18 @@
     "seatFrontRight",
     "seatRearLeft",
     "seatRearRight",
+    "seatThirdLeft",
+    "seatThirdRight",
     "wheelFrontLeft",
     "wheelFrontRight",
     "wheelRearLeft",
     "wheelRearRight"
   ],
   "totals": {
-    "bytes": 2205980,
+    "bytes": 1810604,
     "materials": 15,
-    "meshes": 33,
-    "nodes": 41,
-    "triangles": 32680
+    "meshes": 35,
+    "nodes": 43,
+    "triangles": 29284
   }
 }

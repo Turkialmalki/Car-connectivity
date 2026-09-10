@@ -35,95 +35,106 @@ import struct
 import sys
 
 # --------------------------------------------------------------------------
-# Vehicle package. Mid-size electric crossover proportions, metres.
+# Vehicle package.
+#
+# Styled after a full-size three-row electric SUV in the Rivian R1S idiom:
+# upright and slab-sided, a long flat roof, short overhangs, high ground
+# clearance, squared wheel arches, a near-vertical tailgate, and the signature
+# lighting — a full-width bar across the nose with tall vertical "stadium"
+# lamps outboard of it.
+#
+# The geometry is authored here, so this is a styling reference, not a copy of
+# any manufacturer's data, and the app does not badge the vehicle. See
+# docs/ASSETS.md.
 # --------------------------------------------------------------------------
-LENGTH = 4.751
-WIDTH = 1.921
-HEIGHT = 1.624
-WHEELBASE = 2.890
+LENGTH = 5.100
+WIDTH = 2.015
+HEIGHT = 1.820
+WHEELBASE = 3.076
 
 HALF_W = WIDTH / 2.0
 FRONT_AXLE_Z = WHEELBASE / 2.0
 REAR_AXLE_Z = -WHEELBASE / 2.0
-WHEEL_RADIUS = 0.3785
-TIRE_WIDTH = 0.255
+WHEEL_RADIUS = 0.4100          # 22" wheel, ~275/50
+TIRE_WIDTH = 0.2750
 
 # Longitudinal stations: (z, y_bottom, y_top, half_width, belt_y, roof_half_width)
 #   y_bottom  underbody / valance height at this station
-#   y_top     highest point of the section (hood crown, roof, or decklid)
+#   y_top     highest point of the section (bonnet crown, roof, or tailgate)
 #   belt_y    beltline — the crease where bodyside ends and glass begins
 #   roof_hw   half-width of the roof / upper surface at this station
 # Ordered nose (+z) to tail (-z).
 STATIONS = [
-    (2.3755, 0.360, 0.740, 0.700, 0.680, 0.400),
-    (2.3000, 0.268, 0.800, 0.812, 0.748, 0.480),
-    (2.2000, 0.212, 0.858, 0.888, 0.802, 0.540),
-    (2.1000, 0.190, 0.898, 0.912, 0.842, 0.565),
-    (1.9500, 0.176, 0.940, 0.933, 0.884, 0.585),
-    (1.8000, 0.168, 0.972, 0.944, 0.914, 0.596),
-    (1.6000, 0.161, 1.006, 0.952, 0.948, 0.602),
-    (1.4000, 0.156, 1.038, 0.957, 0.978, 0.604),
-    (1.2400, 0.153, 1.062, 0.959, 1.000, 0.604),
-    (1.1400, 0.152, 1.078, 0.9605, 1.014, 0.602),
-    # Cowl -> windscreen. y_top climbs steeply, roof width opens out.
-    (1.0600, 0.151, 1.120, 0.9605, 1.008, 0.660),
-    (0.9600, 0.150, 1.196, 0.9605, 1.000, 0.716),
-    (0.8000, 0.150, 1.310, 0.9605, 0.994, 0.742),
-    (0.6000, 0.150, 1.442, 0.9605, 0.988, 0.740),
-    (0.4000, 0.149, 1.545, 0.9605, 0.982, 0.730),
-    (0.2000, 0.148, 1.601, 0.9605, 0.978, 0.717),
-    (0.0000, 0.146, 1.621, 0.9605, 0.974, 0.708),
-    (-0.2000, 0.145, 1.624, 0.9605, 0.971, 0.703),
-    (-0.4500, 0.145, 1.621, 0.9600, 0.968, 0.700),
-    (-0.7000, 0.145, 1.612, 0.9580, 0.966, 0.697),
-    (-1.0000, 0.148, 1.590, 0.9525, 0.963, 0.688),
-    (-1.2000, 0.150, 1.568, 0.9490, 0.960, 0.678),
-    (-1.3400, 0.152, 1.548, 0.9460, 0.958, 0.668),
-    (-1.5000, 0.155, 1.516, 0.9410, 0.955, 0.650),
-    (-1.6500, 0.159, 1.474, 0.9350, 0.951, 0.624),
-    (-1.8000, 0.166, 1.418, 0.9270, 0.946, 0.592),
-    (-1.9200, 0.174, 1.356, 0.9180, 0.940, 0.560),
-    (-2.0400, 0.188, 1.276, 0.9060, 0.930, 0.522),
-    (-2.1500, 0.212, 1.176, 0.8900, 0.912, 0.482),
-    (-2.2500, 0.258, 1.058, 0.8600, 0.880, 0.440),
-    (-2.3200, 0.320, 0.952, 0.8180, 0.836, 0.402),
-    (-2.3755, 0.398, 0.868, 0.7500, 0.786, 0.360),
+    # Slab front: the section stays nearly full size right up to the nose, so
+    # the face is vertical and the end cap only rounds its perimeter.
+    (2.5500, 0.302, 1.352, 0.972, 1.296, 0.694),
+    (2.5100, 0.292, 1.366, 0.990, 1.306, 0.708),
+    (2.4600, 0.285, 1.374, 1.000, 1.314, 0.718),
+    (2.3800, 0.281, 1.380, 1.005, 1.322, 0.724),
+    (2.2800, 0.278, 1.383, 1.0072, 1.328, 0.728),
+    (2.1000, 0.276, 1.386, 1.0075, 1.318, 0.730),
+    (1.9000, 0.272, 1.392, 1.0075, 1.322, 0.733),
+    (1.7500, 0.268, 1.396, 1.0075, 1.326, 0.735),
+    (1.4500, 0.263, 1.406, 1.0075, 1.336, 0.740),
+    (1.2000, 0.261, 1.416, 1.0075, 1.346, 0.742),
+    (1.0500, 0.260, 1.432, 1.0075, 1.356, 0.745),   # cowl — bonnet ends
+    # Windscreen. Upright, ~50 degrees, and the beltline drops to its true
+    # height as the bodyside takes over from the bonnet.
+    (0.9900, 0.259, 1.478, 1.0075, 1.272, 0.766),
+    (0.9500, 0.259, 1.522, 1.0075, 1.196, 0.790),
+    (0.8000, 0.258, 1.642, 1.0075, 1.152, 0.815),
+    (0.6500, 0.257, 1.742, 1.0075, 1.142, 0.825),
+    (0.4800, 0.256, 1.800, 1.0075, 1.136, 0.830),
+    (0.3000, 0.255, 1.818, 1.0075, 1.131, 0.832),
+    # Long flat roof over three rows.
+    (0.0000, 0.254, 1.820, 1.0075, 1.129, 0.833),
+    (-0.4000, 0.254, 1.820, 1.0075, 1.127, 0.833),
+    (-0.9000, 0.255, 1.820, 1.0075, 1.125, 0.832),
+    (-1.3000, 0.257, 1.819, 1.0060, 1.123, 0.830),
+    (-1.7000, 0.260, 1.814, 1.0030, 1.121, 0.826),
+    # Near-vertical tailgate: the roofline holds to the tail, and the rear face
+    # stands up rather than sloping away.
+    (-2.0500, 0.265, 1.802, 0.9980, 1.119, 0.816),
+    (-2.2500, 0.268, 1.798, 0.9950, 1.117, 0.812),
+    (-2.4000, 0.272, 1.792, 0.9900, 1.114, 0.806),
+    (-2.5000, 0.279, 1.780, 0.9800, 1.110, 0.794),
+    (-2.5500, 0.292, 1.754, 0.9600, 1.104, 0.774),
 ]
 
 # Section control points, lower half: (width_factor_of_hw, height_fraction_of_lower)
-# Runs from underbody centreline up to the beltline.
+# Slab-sided: maximum width is held over a long stretch instead of peaking.
 LOWER_CONTROLS = [
     (0.000, 0.000),
-    (0.400, 0.004),
-    (0.700, 0.028),
-    (0.880, 0.092),
-    (0.958, 0.210),
-    (0.992, 0.360),
-    (1.000, 0.500),
-    (0.996, 0.660),
-    (0.978, 0.830),
-    (0.952, 0.945),
-    (0.936, 1.000),
+    (0.450, 0.004),
+    (0.780, 0.022),
+    (0.920, 0.070),
+    (0.975, 0.150),
+    (0.995, 0.262),
+    (1.000, 0.400),
+    (1.000, 0.560),
+    (0.998, 0.700),
+    (0.992, 0.840),
+    (0.980, 0.940),
+    (0.968, 1.000),
 ]
 
 # Section control points, upper half: (blend, height_fraction_of_upper)
-# `blend` interpolates half-width between hw*0.936 (beltline) and roof_hw.
-# The last entries fold the surface over the roof crown to the centreline.
+# Little tumblehome — the glass stands up nearly vertical.
 UPPER_CONTROLS = [
     (0.000, 0.000),
-    (0.070, 0.120),
-    (0.200, 0.290),
-    (0.390, 0.470),
-    (0.610, 0.650),
-    (0.820, 0.810),
-    (0.960, 0.915),
-    (1.000, 0.972),  # roof rail
+    (0.045, 0.130),
+    (0.130, 0.310),
+    (0.260, 0.500),
+    (0.430, 0.680),
+    (0.640, 0.830),
+    (0.850, 0.930),
+    (1.000, 0.975),
 ]
-# Roof crown, expressed as (factor_of_roof_hw, height_fraction_of_upper).
+# Roof crown: square-shouldered and flat across the middle.
 ROOF_CROWN = [
-    (0.860, 0.990),
-    (0.560, 1.000),
-    (0.000, 1.004),
+    (0.940, 0.992),
+    (0.680, 1.000),
+    (0.000, 1.002),
 ]
 
 LOWER_SAMPLES = 17  # inclusive of both ends; t = 0 .. 0.5
@@ -131,12 +142,15 @@ UPPER_SAMPLES = 17  # t = 0.5 .. 1.0
 STATION_SUBDIV = 2  # extra interpolated stations between table entries
 
 # End-cap rings: (scale toward the ring centroid, distance pushed outboard).
+# End-cap rings: (scale toward the ring centroid, distance pushed outboard).
+# Deliberately shallow — this vehicle has flat vertical ends, so the cap only
+# breaks the perimeter edge instead of drawing the face out into a snout.
 CAP_PROFILE = [
-    (0.955, 0.022),
-    (0.860, 0.043),
-    (0.700, 0.060),
-    (0.470, 0.071),
-    (0.000, 0.078),
+    (0.988, 0.009),
+    (0.952, 0.019),
+    (0.878, 0.027),
+    (0.700, 0.033),
+    (0.000, 0.037),
 ]
 
 
@@ -215,10 +229,11 @@ def build_stations():
     return dense
 
 
-ARCH_RADIUS = 0.520     # opening radius around the axle centre
-ARCH_TOP = 0.812        # height of the arch crown above the ground
-ARCH_FLANK_START = 0.50  # |x|/hw at which the arch starts to bite
-ARCH_FLANK_FULL = 0.86   # |x|/hw at which it bites fully
+ARCH_RADIUS = 0.615     # opening radius around the axle centre
+ARCH_TOP = 1.052        # height of the arch crown above the ground
+ARCH_SQUARENESS = 2.7   # 2 = circular; higher squares the arch off
+ARCH_FLANK_START = 0.46  # |x|/hw at which the arch starts to bite
+ARCH_FLANK_FULL = 0.84   # |x|/hw at which it bites fully
 
 
 def arch_floor(z, x_fraction, y_bot):
@@ -226,13 +241,16 @@ def arch_floor(z, x_fraction, y_bot):
 
     Sweeping the lower flank upward around each axle is what turns a plain
     lofted tube into a car: without it the wheels intersect a solid side.
+
+    The profile is a superellipse rather than a circle, because this vehicle's
+    arches are squared off at the top rather than domed.
     """
     best = y_bot
     for axle in (FRONT_AXLE_Z, REAR_AXLE_Z):
-        dz = z - axle
-        if abs(dz) >= ARCH_RADIUS:
+        dz = abs(z - axle)
+        if dz >= ARCH_RADIUS:
             continue
-        arc = math.sqrt(max(0.0, 1.0 - (dz / ARCH_RADIUS) ** 2))
+        arc = (1.0 - (dz / ARCH_RADIUS) ** ARCH_SQUARENESS) ** (1.0 / ARCH_SQUARENESS)
         best = max(best, y_bot + (ARCH_TOP - y_bot) * arc)
     if best <= y_bot:
         return y_bot
@@ -348,19 +366,23 @@ DOOR_RL = "doorRearLeft"
 DOOR_RR = "doorRearRight"
 PORT = "chargePortFlap"
 
-DOOR_T_MIN, DOOR_T_MAX = 0.130, 0.822
-FRONT_DOOR_Z = (-0.100, 0.955)
-REAR_DOOR_Z = (-1.245, -0.100)
-FRUNK_Z = (1.150, 1.985)
-FRUNK_T_MIN = 0.545
-LIFTGATE_UPPER_Z = -1.520
-LIFTGATE_LOWER_Z = -1.800
-LIFTGATE_T_MIN = 0.145
-PORT_Z = (-1.700, -1.480)
-PORT_T = (0.352, 0.492)
+DOOR_T_MIN, DOOR_T_MAX = 0.130, 0.842
+FRONT_DOOR_Z = (-0.205, 0.945)
+REAR_DOOR_Z = (-1.455, -0.205)
+FRUNK_Z = (1.090, 2.330)
+FRUNK_T_MIN = 0.560
+# The tailgate is close to vertical, so it is mostly the rear FACE plus a short
+# run of roof, rather than the long sloping hatch of a fastback.
+LIFTGATE_UPPER_Z = -2.055
+LIFTGATE_LOWER_Z = -2.290
+LIFTGATE_T_MIN = 0.150
+# Charge port sits on the driver's-side FRONT wing on this vehicle, ahead of the
+# door and behind the wheel arch — not on the rear quarter.
+PORT_Z = (1.560, 1.790)
+PORT_T = (0.470, 0.610)
 
 # Glass bands, evaluated after panel assignment.
-WINDSCREEN_Z = (0.150, 1.150)
+WINDSCREEN_Z = (0.240, 1.090)
 GLASS_T_MIN = 0.848  # roof band; only glass where the z range says so
 
 
@@ -386,10 +408,10 @@ def classify(z, t, x):
 def is_glass(panel, z, t):
     """Separate glazing so it can take a transparent material."""
     if panel in (DOOR_FL, DOOR_FR, DOOR_RL, DOOR_RR):
-        return t >= 0.560
+        return t >= 0.600
     if panel == LIFTGATE:
-        # Backlight: the upper band forward of the tail.
-        return t >= 0.640 and z >= -2.240
+        # Backlight: the upper band of the near-vertical tailgate.
+        return t >= 0.620 and z >= -2.480
     if panel == BODY:
         if WINDSCREEN_Z[0] <= z <= WINDSCREEN_Z[1] and t >= 0.700:
             return True
@@ -409,16 +431,16 @@ def is_glass(panel, z, t):
 #   about +X, a panel hinged at its REAR edge lifts on a positive angle, and one
 #   hinged at its front edge (the bonnet) lifts on a negative angle.
 HINGES = {
-    DOOR_FL: dict(pivot=(-0.905, 0.760, 0.955), axis=(0, 1, 0), open_deg=64.0),
-    DOOR_FR: dict(pivot=(0.905, 0.760, 0.955), axis=(0, 1, 0), open_deg=-64.0),
-    DOOR_RL: dict(pivot=(-0.900, 0.760, -0.100), axis=(0, 1, 0), open_deg=72.0),
-    DOOR_RR: dict(pivot=(0.900, 0.760, -0.100), axis=(0, 1, 0), open_deg=-72.0),
-    # Liftgate swings up and rearward about the roof's trailing edge.
-    LIFTGATE: dict(pivot=(0.0, 1.512, -1.520), axis=(1, 0, 0), open_deg=44.0),
+    DOOR_FL: dict(pivot=(-0.955, 0.900, 0.945), axis=(0, 1, 0), open_deg=66.0),
+    DOOR_FR: dict(pivot=(0.955, 0.900, 0.945), axis=(0, 1, 0), open_deg=-66.0),
+    DOOR_RL: dict(pivot=(-0.950, 0.900, -0.205), axis=(0, 1, 0), open_deg=74.0),
+    DOOR_RR: dict(pivot=(0.950, 0.900, -0.205), axis=(0, 1, 0), open_deg=-74.0),
+    # Tailgate swings up about the roof's trailing edge.
+    LIFTGATE: dict(pivot=(0.0, 1.802, -2.055), axis=(1, 0, 0), open_deg=68.0),
     # Bonnet is hinged at the cowl and lifts from its leading edge.
-    FRUNK: dict(pivot=(0.0, 1.062, 1.150), axis=(1, 0, 0), open_deg=-52.0),
-    # Flap swings outboard about its rearward vertical edge.
-    PORT: dict(pivot=(-0.905, 0.905, -1.700), axis=(0, 1, 0), open_deg=-105.0),
+    FRUNK: dict(pivot=(0.0, 1.432, 1.090), axis=(1, 0, 0), open_deg=-50.0),
+    # Flap swings forward about its leading vertical edge on the front wing.
+    PORT: dict(pivot=(-1.000, 1.190, 1.790), axis=(0, 1, 0), open_deg=100.0),
 }
 
 
@@ -501,18 +523,30 @@ MATERIALS = {
     "brakeDisc":       ((0.300, 0.305, 0.312, 1.0), 0.75, 0.420, None, False),
 }
 
-# Light surfaces: name -> (z range, t range, side)  side: -1 left, +1 right, 0 both
+# Light surfaces: name -> (z range, t range, side, material)
+#   side: -1 left, +1 right, 0 both
+#
+# The signature of this vehicle is a FULL-WIDTH horizontal bar across the nose
+# with TALL VERTICAL "stadium" lamps outboard of it, and the same idea repeated
+# at the rear. A vertical lamp is a wide `t` span at a narrow `z`; a horizontal
+# bar is a narrow `t` span running across every `x`.
+# Entries are (z range, t range, side, material, minimum |x| in metres).
+# The |x| floor is what pins a lamp to the OUTER edge of the face: `side` only
+# picks left from right, it cannot say "outboard".
 LIGHT_PATCHES = {
-    "headlightLeft":       ((2.012, 2.238), (0.300, 0.452), -1, "headlightLens"),
-    "headlightRight":      ((2.012, 2.238), (0.300, 0.452), +1, "headlightLens"),
-    "indicatorFrontLeft":  ((2.012, 2.238), (0.236, 0.296), -1, "indicatorLens"),
-    "indicatorFrontRight": ((2.012, 2.238), (0.236, 0.296), +1, "indicatorLens"),
-    "daytimeRunningBar":   ((2.196, 2.330), (0.470, 0.560), 0, "headlightLens"),
-    "taillightLeft":       ((-2.330, -2.150), (0.300, 0.452), -1, "taillightLens"),
-    "taillightRight":      ((-2.330, -2.150), (0.300, 0.452), +1, "taillightLens"),
-    "indicatorRearLeft":   ((-2.330, -2.150), (0.236, 0.296), -1, "indicatorLens"),
-    "indicatorRearRight":  ((-2.330, -2.150), (0.236, 0.296), +1, "indicatorLens"),
-    "taillightBar":        ((-2.360, -2.240), (0.470, 0.575), 0, "taillightLens"),
+    # Front: a full-width bar high on the face, with a tall vertical lamp
+    # hanging at each outer corner beneath it.
+    "daytimeRunningBar":   ((2.540, 2.596), (0.556, 0.610), 0, "headlightLens", 0.00),
+    "headlightLeft":       ((2.540, 2.596), (0.318, 0.552), -1, "headlightLens", 0.60),
+    "headlightRight":      ((2.540, 2.596), (0.318, 0.552), +1, "headlightLens", 0.60),
+    "indicatorFrontLeft":  ((2.540, 2.596), (0.246, 0.310), -1, "indicatorLens", 0.60),
+    "indicatorFrontRight": ((2.540, 2.596), (0.246, 0.310), +1, "indicatorLens", 0.60),
+    # Rear: the same idea repeated.
+    "taillightBar":        ((-2.596, -2.540), (0.556, 0.610), 0, "taillightLens", 0.00),
+    "taillightLeft":       ((-2.596, -2.540), (0.318, 0.552), -1, "taillightLens", 0.60),
+    "taillightRight":      ((-2.596, -2.540), (0.318, 0.552), +1, "taillightLens", 0.60),
+    "indicatorRearLeft":   ((-2.596, -2.540), (0.246, 0.310), -1, "indicatorLens", 0.60),
+    "indicatorRearRight":  ((-2.596, -2.540), (0.246, 0.310), +1, "indicatorLens", 0.60),
 }
 
 
@@ -611,7 +645,7 @@ def build_panels():
             j2 = (j + 1) % cols
             cx, _, cz = cell_centre(grid, i, j)
             t = (t_values[j] + t_values[j2]) / 2.0
-            if not (-2.405 <= cz <= 1.16):
+            if not (-2.520 <= cz <= 1.10):
                 continue
             if t < 0.055:  # leave the floor to the dedicated floor pan
                 continue
@@ -622,7 +656,7 @@ def build_panels():
     # Light lenses, offset proud of the body and parented to whichever panel
     # owns that stretch of bodywork, so a lens on the tailgate travels with it.
     lights = {}
-    for name, (zr, tr, side, material) in LIGHT_PATCHES.items():
+    for name, (zr, tr, side, material, min_abs_x) in LIGHT_PATCHES.items():
         mesh = Mesh(name)
         owner_votes = {}
         outer = offset_grid(grid, normals, -LENS_OFFSET)
@@ -636,6 +670,8 @@ def build_panels():
                 if side < 0 and cx >= 0:
                     continue
                 if side > 0 and cx <= 0:
+                    continue
+                if abs(cx) < min_abs_x:
                     continue
                 mesh.add_quad(material, outer[i][j], outer[i + 1][j],
                               outer[i + 1][j2], outer[i][j2])
@@ -671,7 +707,7 @@ def build_wheel(name, centre, mirrored):
     mesh = Mesh(name)
     hw = TIRE_WIDTH / 2.0
     R = WHEEL_RADIUS
-    rim_r = 0.2413  # 19in
+    rim_r = 0.2794  # 22in
     # (radius, lateral offset) walking across the tyre from inner to outer face.
     tyre_profile = [
         (rim_r, -hw * 0.86),
@@ -764,70 +800,80 @@ def rounded_rect(cx, cy, cz, half_w, half_h, radius, axis, steps=5):
     return out
 
 
-def build_seat(name, x, z, facing_back=False):
+def build_seat(name, x, z, scale=1.0):
+    """A seat: cushion, raked backrest and head restraint.
+
+    The floor sits high in this vehicle, so seat heights are referenced to the
+    load floor at y = 0.43 rather than to the ground.
+    """
     mesh = Mesh(name)
-    hw, hh = 0.255, 0.055
+    base = 0.430
+    hw, hh = 0.262 * scale, 0.058
     # Cushion.
     loft_box(mesh, "seat", [
-        rounded_rect(x, 0.415, z + 0.24, hw * 0.92, hh, 0.035, "y"),
-        rounded_rect(x, 0.425, z, hw, hh * 1.15, 0.035, "y"),
-        rounded_rect(x, 0.445, z - 0.22, hw * 0.95, hh * 1.1, 0.035, "y"),
+        rounded_rect(x, base + 0.135, z + 0.250, hw * 0.92, hh, 0.035, "y"),
+        rounded_rect(x, base + 0.148, z, hw, hh * 1.15, 0.035, "y"),
+        rounded_rect(x, base + 0.168, z - 0.230, hw * 0.95, hh * 1.1, 0.035, "y"),
     ])
     # Backrest, raked back from the cushion's rear edge.
     loft_box(mesh, "seat", [
-        rounded_rect(x, 0.470, z - 0.235, hw * 0.95, 0.060, 0.030, "y"),
-        rounded_rect(x, 0.700, z - 0.290, hw * 0.98, 0.058, 0.030, "y"),
-        rounded_rect(x, 0.930, z - 0.345, hw * 0.90, 0.052, 0.030, "y"),
+        rounded_rect(x, base + 0.196, z - 0.246, hw * 0.95, 0.062, 0.030, "y"),
+        rounded_rect(x, base + 0.436, z - 0.300, hw * 0.98, 0.060, 0.030, "y"),
+        rounded_rect(x, base + 0.672, z - 0.356, hw * 0.90, 0.054, 0.030, "y"),
     ])
     # Head restraint.
     loft_box(mesh, "seat", [
-        rounded_rect(x, 0.985, z - 0.352, 0.105, 0.042, 0.028, "y"),
-        rounded_rect(x, 1.085, z - 0.362, 0.110, 0.044, 0.028, "y"),
-        rounded_rect(x, 1.155, z - 0.372, 0.092, 0.038, 0.026, "y"),
+        rounded_rect(x, base + 0.728, z - 0.364, 0.108, 0.044, 0.028, "y"),
+        rounded_rect(x, base + 0.832, z - 0.374, 0.113, 0.046, 0.028, "y"),
+        rounded_rect(x, base + 0.906, z - 0.384, 0.095, 0.040, 0.026, "y"),
     ])
     return mesh
 
 
 def build_interior_fittings():
-    """Floor pan, dashboard, centre screen, steering wheel and seats."""
+    """Load floor, dashboard, centre screen, steering wheel and three seat rows."""
     meshes = []
 
     floor = Mesh("cabinFloor")
-    z0, z1 = -2.16, 1.02
-    for i in range(24):
-        za = lerp(z0, z1, i / 24)
-        zb = lerp(z0, z1, (i + 1) / 24)
-        w = 0.84
-        floor.add_quad("cabinShell", (-w, 0.245, za), (w, 0.245, za), (w, 0.245, zb), (-w, 0.245, zb), flip=True)
+    z0, z1 = -2.40, 1.00
+    for i in range(28):
+        za = lerp(z0, z1, i / 28)
+        zb = lerp(z0, z1, (i + 1) / 28)
+        w = 0.90
+        floor.add_quad("cabinShell", (-w, 0.430, za), (w, 0.430, za),
+                       (w, 0.430, zb), (-w, 0.430, zb), flip=True)
     meshes.append(floor)
 
     dash = Mesh("dashboard")
     loft_box(dash, "dash", [
-        rounded_rect(0.0, 0.905, 0.985, 0.86, 0.075, 0.045, "y"),
-        rounded_rect(0.0, 0.960, 0.855, 0.85, 0.090, 0.045, "y"),
-        rounded_rect(0.0, 0.965, 0.735, 0.83, 0.070, 0.040, "y"),
+        rounded_rect(0.0, 1.108, 0.985, 0.90, 0.080, 0.045, "y"),
+        rounded_rect(0.0, 1.168, 0.855, 0.89, 0.094, 0.045, "y"),
+        rounded_rect(0.0, 1.174, 0.730, 0.87, 0.074, 0.040, "y"),
     ])
     meshes.append(dash)
 
     screen = Mesh("centreScreen")
-    sp = rounded_rect(0.0, 1.010, 0.760, 0.190, 0.128, 0.012, "z")
-    back = [(x, y, z - 0.022) for x, y, z in sp]
+    sp = rounded_rect(0.0, 1.222, 0.756, 0.208, 0.134, 0.012, "z")
+    back = [(x, y, z - 0.024) for x, y, z in sp]
     loft_box(screen, "screen", [back, sp])
     meshes.append(screen)
 
     # Left-hand drive: the driver sits on the left.
     wheel = Mesh("steeringWheel")
-    add_revolve(wheel, "trim", [(0.176, -0.018), (0.196, -0.010), (0.196, 0.010), (0.176, 0.018)],
-                (-0.375, 0.930, 0.905), 24)
+    add_revolve(wheel, "trim", [(0.182, -0.019), (0.202, -0.010), (0.202, 0.010), (0.182, 0.019)],
+                (-0.392, 1.132, 0.902), 24)
     meshes.append(wheel)
 
-    for name, x, z in (
-        ("seatFrontLeft", -0.375, 0.330),
-        ("seatFrontRight", 0.375, 0.330),
-        ("seatRearLeft", -0.395, -0.640),
-        ("seatRearRight", 0.395, -0.640),
+    # Three rows.
+    for name, x, z, scale in (
+        ("seatFrontLeft", -0.392, 0.330, 1.0),
+        ("seatFrontRight", 0.392, 0.330, 1.0),
+        ("seatRearLeft", -0.412, -0.700, 1.0),
+        ("seatRearRight", 0.412, -0.700, 1.0),
+        ("seatThirdLeft", -0.400, -1.660, 0.92),
+        ("seatThirdRight", 0.400, -1.660, 0.92),
     ):
-        meshes.append(build_seat(name, x, z))
+        meshes.append(build_seat(name, x, z, scale))
 
     return meshes
 
@@ -837,11 +883,11 @@ def build_mirrors():
     out = {}
     for name, sign, owner in (("mirrorLeft", -1, DOOR_FL), ("mirrorRight", 1, DOOR_FR)):
         mesh = Mesh(name)
-        base_x = sign * 0.945
+        base_x = sign * 0.998
         loft_box(mesh, "trim", [
-            rounded_rect(base_x, 1.030, 0.845, 0.020, 0.030, 0.012, "x"),
-            rounded_rect(base_x + sign * 0.075, 1.048, 0.838, 0.036, 0.042, 0.016, "x"),
-            rounded_rect(base_x + sign * 0.135, 1.055, 0.832, 0.030, 0.048, 0.016, "x"),
+            rounded_rect(base_x, 1.248, 0.858, 0.022, 0.032, 0.012, "x"),
+            rounded_rect(base_x + sign * 0.082, 1.268, 0.850, 0.038, 0.046, 0.016, "x"),
+            rounded_rect(base_x + sign * 0.146, 1.276, 0.842, 0.032, 0.052, 0.016, "x"),
         ])
         out[name] = (mesh, owner)
     return out
@@ -1030,10 +1076,10 @@ def main():
 
     # --- Wheels ---
     for name, x, z, mirrored in (
-        ("wheelFrontLeft", -0.828, FRONT_AXLE_Z, True),
-        ("wheelFrontRight", 0.828, FRONT_AXLE_Z, False),
-        ("wheelRearLeft", -0.828, REAR_AXLE_Z, True),
-        ("wheelRearRight", 0.828, REAR_AXLE_Z, False),
+        ("wheelFrontLeft", -0.872, FRONT_AXLE_Z, True),
+        ("wheelFrontRight", 0.872, FRONT_AXLE_Z, False),
+        ("wheelRearLeft", -0.872, REAR_AXLE_Z, True),
+        ("wheelRearRight", 0.872, REAR_AXLE_Z, False),
     ):
         mesh = build_wheel(name, (x, WHEEL_RADIUS, z), mirrored)
         idx = g.add_mesh(mesh)
