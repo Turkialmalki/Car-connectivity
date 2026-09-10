@@ -50,7 +50,7 @@ export default function PairVehicle() {
    * granted server-side, and the account was provisioned one on first sign-in.
    * Offering a VIN form that could only ever fail would be a fake control.
    */
-  const useProvisionedVehicle = () => {
+  const continueWithProvisionedVehicle = () => {
     if (!activeVehicleId) {
       showBanner('No vehicle is attached to this account yet.', 'warning');
       return;
@@ -133,7 +133,7 @@ export default function PairVehicle() {
           <Button
             label={connected ? 'Continue with my vehicle' : t('onboarding.useDemoVehicle')}
             icon="car"
-            onPress={() => (connected ? useProvisionedVehicle() : void pair(DEMO_VIN))}
+            onPress={() => (connected ? continueWithProvisionedVehicle() : void pair(DEMO_VIN))}
             loading={verifying && !manualOpen}
           />
           <Text
