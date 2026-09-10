@@ -15,22 +15,32 @@
 
 const trimTrailingSlash = (value: string): string => value.replace(/\/+$/, '');
 
-const readEnv = (name: string): string | null => {
-  const value = process.env[name];
-  return value && value.trim().length > 0 ? value.trim() : null;
-};
+const clean = (value: string | undefined): string | null =>
+  value && value.trim().length > 0 ? value.trim() : null;
+
+/**
+ * Each variable is read as a LITERAL member expression.
+ *
+ * Expo inlines `process.env.EXPO_PUBLIC_*` at build time by substituting the
+ * exact member expression it finds in the source. A dynamic lookup —
+ * `process.env[name]` — is not a member expression it can recognise, so it
+ * survives into the bundle and evaluates to undefined at runtime. The app then
+ * silently falls back to local fixtures against a perfectly good backend, with
+ * nothing anywhere saying why. Written out longhand, deliberately.
+ */
+const API_URL = clean(process.env.EXPO_PUBLIC_API_URL);
+const SUPABASE_URL = clean(process.env.EXPO_PUBLIC_SUPABASE_URL);
+const SUPABASE_PUBLISHABLE_KEY = clean(process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 
 export const backendConfig = {
-  apiUrl: readEnv('EXPO_PUBLIC_API_URL')
-    ? trimTrailingSlash(readEnv('EXPO_PUBLIC_API_URL') as string)
-    : null,
-  supabaseUrl: readEnv('EXPO_PUBLIC_SUPABASE_URL'),
+  apiUrl: API_URL ? trimTrailingSlash(API_URL) : null,
+  supabaseUrl: SUPABASE_URL,
   /**
    * Publishable key only. Every permission it carries is bounded by Row Level
    * Security; the secret key exists solely on the server and is never bundled
    * into an app that ships to a device.
    */
-  supabasePublishableKey: readEnv('EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY'),
+  supabasePublishableKey: SUPABASE_PUBLISHABLE_KEY,
 } as const;
 
 export const isConnectedMode = (): boolean =>

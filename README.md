@@ -147,10 +147,18 @@ or paste each file into the SQL editor, in order.
 
 ### Try it without signing up
 
+Open both in separate tabs and watch them agree:
+
 | | |
 |---|---|
-| **Console** | https://car-connectivity.vercel.app — press **Open the demo vehicle** |
-| **Account** | `demo@carconnectivity.app` / `demo-vehicle-2026` |
+| **The app** | https://car-connectivity-app.vercel.app |
+| **Simulator console** | https://car-connectivity.vercel.app/simulator |
+| **Account** | `demo@carconnectivity.app` / `demo-vehicle-2026` — press **Open the demo vehicle** / **Use the demo vehicle** |
+
+The app link is the React Native project's **web build**, deployed as a static
+site. It is the same code that runs on a device; on web there is no
+hardware-backed storage, so a reload signs you out, and no biometric prompt.
+Native distribution goes through EAS and is separate from both deployments.
 
 The same button exists on the mobile sign-in screen in connected mode, so the app
 and the console open the same simulated car. It is an ordinary account with
