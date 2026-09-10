@@ -68,6 +68,9 @@ Read this section first. Every claim the app makes about itself is bounded by it
 
 **Requirements:** Node 20+, npm 10+. iOS Simulator (Xcode) or Android Emulator optional.
 
+The fastest look at the running system is the deployed console — see
+[Try it without signing up](#try-it-without-signing-up).
+
 The app runs in one of two modes, and it tells you which:
 
 | Mode | When | What you get |
@@ -142,6 +145,32 @@ or paste each file into the SQL editor, in order.
 > Adding a policy to it works; `ALTER TABLE` on it does not, and is not needed — RLS is
 > already enabled there on a hosted project.
 
+### Try it without signing up
+
+| | |
+|---|---|
+| **Console** | https://car-connectivity.vercel.app — press **Open the demo vehicle** |
+| **Account** | `demo@carconnectivity.app` / `demo-vehicle-2026` |
+
+The same button exists on the mobile sign-in screen in connected mode, so the app
+and the console open the same simulated car. It is an ordinary account with
+ordinary permissions — it authenticates through Supabase Auth and sees only its
+own vehicle — not a bypass.
+
+**A two-minute demonstration**
+
+1. Open the console, press **Open the demo vehicle**, then **Start simulation**.
+   Telemetry begins flowing every two seconds.
+2. In the app, tap **Unlock**. It shows pending, the console logs the claim, and
+   the lock only changes once the vehicle confirms.
+3. Press **Start journey** in the console. It refuses — the vehicle is not ready
+   to drive.
+4. In the app, **Enable EV power**. The vehicle reports ready and stays parked.
+5. Press **Start journey** again. The map moves, heading and speed following the
+   route.
+6. Tick **Simulate connectivity loss**. The app stops receiving reports and shows
+   its last known state with an age, rather than a frozen live view.
+
 ### Deployment
 
 | | |
@@ -151,19 +180,20 @@ or paste each file into the SQL editor, in order.
 | **Vercel project** | `car-connectivity`, root directory `web`, linked to this repository |
 | **Supabase project** | `Car-connectivity` (`prcnihieupchvarwwmdf`) |
 
-`SUPABASE_SECRET_KEY` must be set on the Vercel project before the API can do
-anything beyond reject unauthenticated calls. It is the one value that cannot be
-committed or read back from a dashboard API, so it is added by hand:
+All three environment variables are set on the Vercel project.
+`SUPABASE_SECRET_KEY` is stored as a sensitive variable: server-side only, never
+committed, and not readable back from the dashboard.
+
+To verify a deployment end to end:
 
 ```bash
 cd web
-vercel env add SUPABASE_SECRET_KEY production
-vercel env add SUPABASE_SECRET_KEY preview
-vercel deploy --prod
+npm run verify:deployment
 ```
 
-Take the value from **Supabase → Project Settings → API Keys → secret**
-(`sb_secret_...`).
+That script uses nothing but HTTP — the same path the app takes — and checks
+authentication, isolation between accounts, telemetry staleness, idempotency,
+claim-exactly-once, expiry and session displacement.
 
 ### 2. The Next.js app
 

@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "simulator": "tsx scripts/simulator-node.ts"
+    "simulator": "tsx scripts/simulator-node.ts",
+    "verify:deployment": "node scripts/verify-deployment.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
